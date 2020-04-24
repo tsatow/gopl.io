@@ -9,7 +9,7 @@ type Kelvin float64
 const (
 	AbsoluteZeroC Celsius = -273.15
 	FreezingC     Celsius = 0
-	BoilingC      Celsius = 0
+	BoilingC      Celsius = 100
 )
 
 func (c Celsius) String() string    { return fmt.Sprintf("%g°C", c) }
@@ -20,5 +20,5 @@ func CToF(c Celsius) Fahrenheit { return Fahrenheit(c*9/5 + 32) }
 func CToK(c Celsius) Kelvin     { return Kelvin(c + AbsoluteZeroC) }
 func FToC(f Fahrenheit) Celsius { return Celsius((f - 32) * 5 / 9) }
 func FToK(f Fahrenheit) Kelvin  { return CToK(FToC(f)) }
-func KToC(k Kelvin) Celsius     { return Celsius(k - 273.15) }
+func KToC(k Kelvin) Celsius     { return Celsius(k - CToK(FreezingC)) }
 func KToF(k Kelvin) Fahrenheit  { return CToF(KToC(k)) }
