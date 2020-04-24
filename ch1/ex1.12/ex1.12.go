@@ -5,27 +5,39 @@ import (
 	"image/color"
 	"image/gif"
 	"io"
+	"log"
 	"math"
 	"math/rand"
-	"os"
-	"time"
-)
-
-var palette = []color.Color{color.RGBA{0, 0, 0, 255}, color.RGBA{0, 255, 0, 255}}
-
-const (
-	bgcolorIndex   = 0
-	linecolorIndex = 0
+	"net/http"
+	"strconv"
 )
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-	lissajous(os.Stdout)
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		var cycles = 20
+		q := r.URL.Query()
+		if q != nil {
+			for key, vs := range q {
+				if key == "cycles" {
+					cycles, _ = strconv.Atoi(vs[0])
+				}
+			}
+		}
+		lissajous(w, cycles)
+	}
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
 
-func lissajous(out io.Writer) {
+var palette = []color.Color{color.White, color.Black}
+
+const (
+	whiteIndex = 0 // パレットの最初の色
+	blackIndex = 1 // パレットの次の色
+)
+
+func lissajous(out io.Writer, cycles int) {
 	const (
-		cycles  = 5     // 発振器xが完了する周回の回数
 		res     = 0.001 // 回転の分解能
 		size    = 100   //　画像キャンバスは[-size..+size]の範囲を扱う
 		nframes = 64    //アニメーションフレーム数
@@ -40,7 +52,7 @@ func lissajous(out io.Writer) {
 		for t := 0.0; t < cycles*2*math.Pi; t += res {
 			x := math.Sin(t)
 			y := math.Sin(t*freq + phase)
-			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), linecolorIndex)
+			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), blackIndex)
 		}
 		phase += 0.1
 		anim.Delay = append(anim.Delay, delay)
