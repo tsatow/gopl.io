@@ -26,8 +26,8 @@ func main() {
 	for line, c := range counts {
 		if c.counts > 1 {
 			fmt.Printf("%d\t%s\n", c.counts, line)
-			for i := range c.files {
-				fmt.Println(c.files[i])
+			for _, fileName := range c.files {
+				fmt.Println(fileName)
 			}
 		}
 	}
