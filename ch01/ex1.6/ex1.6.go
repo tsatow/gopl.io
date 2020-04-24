@@ -14,7 +14,7 @@ import (
 var palette = []color.Color{color.RGBA{0, 0, 0, 255}, color.RGBA{0, 255, 0, 255}}
 
 const (
-	bgcolorIndex   = 0
+	bgcolorIndex = 0
 )
 
 func main() {
