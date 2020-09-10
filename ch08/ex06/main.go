@@ -6,14 +6,14 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 )
 
 const maxdepth = 3
 
-
 type worklist struct {
 	Depth int
-	List []string
+	List  []string
 }
 
 type unseenlink struct {
@@ -30,10 +30,12 @@ func main() {
 
 	// 追加するworklistsの分
 	wg.Add(1)
-	go func() { worklists <- worklist{
-		Depth: 0,
-		List: os.Args[1:],
-	}}()
+	go func() {
+		worklists <- worklist{
+			Depth: 0,
+			List:  os.Args[1:],
+		}
+	}()
 
 	for i := 0; i < 20; i++ {
 		go func() {
@@ -44,7 +46,7 @@ func main() {
 					// 追加するworklistsの分
 					wg.Add(1)
 					go func() {
-						worklists <- worklist{link.Depth + 1,foundLinks}
+						worklists <- worklist{link.Depth + 1, foundLinks}
 					}()
 				}
 				// 処理したunseenLinksの分
@@ -70,9 +72,10 @@ func main() {
 		}
 	}()
 
+	go spinner(100 * time.Millisecond)
+
 	wg.Wait()
 }
-
 
 func crawl(url string) []string {
 	list, err := links.Extract(url)
@@ -80,4 +83,13 @@ func crawl(url string) []string {
 		log.Print(err)
 	}
 	return list
+}
+
+func spinner(delay time.Duration) {
+	for {
+		for _, r := range `-\|/` {
+			fmt.Printf("\r%c Scanning...\r", r)
+			time.Sleep(delay)
+		}
+	}
 }
