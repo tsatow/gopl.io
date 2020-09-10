@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"golang.org/x/net/html"
+	"os"
 )
 
 func main() {
@@ -37,5 +37,10 @@ func visit(links []string, n *html.Node) []string {
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		links = visit(links, c)
 	}
+
 	return links
+}
+
+type Interface interface {
+	Swap(i, j int)
 }
