@@ -158,6 +158,7 @@ func visit(currUrl string, ctx context, links []string, n *html.Node) []string {
 						completedUrlStr := completedUrl.String()
 						links = append(links, removeFragmentAndQuery(*completedUrl).String())
 
+						// completeIndexHtmlはHTMLと確定していないとうまく動かないので、、、
 						if strings.HasSuffix(completedUrlStr, "/") {
 							completedUrlStr += "index.html"
 						}
@@ -176,6 +177,7 @@ func visit(currUrl string, ctx context, links []string, n *html.Node) []string {
 						completedUrlStr := completedUrl.String()
 						links = append(links, removeFragmentAndQuery(*completedUrl).String())
 
+						// completeIndexHtmlはHTMLと確定していないとうまく動かないので、、、
 						if strings.HasSuffix(completedUrlStr, "/") {
 							completedUrlStr += "index.html"
 						}
