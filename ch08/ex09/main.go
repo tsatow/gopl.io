@@ -17,7 +17,7 @@ func main() {
 		roots = []string{"."}
 	}
 
-	initilizeScreen(roots)
+	initializeScreen(roots)
 
 	var wg sync.WaitGroup
 	for i, root := range roots {
@@ -58,7 +58,7 @@ func main() {
 	fmt.Fprintf(os.Stdout, "\033[%dB", len(roots))
 }
 
-func initilizeScreen(roots []string) {
+func initializeScreen(roots []string) {
 	for range roots {
 		_, _ = fmt.Fprint(os.Stdout, "\n")
 	}
