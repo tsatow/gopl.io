@@ -17,6 +17,9 @@ func main() {
 		roots = []string{"."}
 	}
 
+	errors := make(chan error)
+	var errs []error
+
 	initializeScreen(roots)
 
 	var wg sync.WaitGroup
@@ -29,7 +32,7 @@ func main() {
 			var wgByRoot sync.WaitGroup
 
 			wgByRoot.Add(1)
-			go walkDir(rootDir, &wgByRoot, fileSizes)
+			go walkDir(rootDir, &wgByRoot, fileSizes, errors)
 			go func() {
 				wgByRoot.Wait()
 				close(fileSizes)
@@ -54,8 +57,18 @@ func main() {
 		}(i, root)
 	}
 
+	go func() {
+		for err := range errors {
+			errs = append(errs, err)
+		}
+	}()
+
 	wg.Wait()
-	fmt.Fprintf(os.Stdout, "\033[%dB", len(roots))
+	_, _ = fmt.Fprintf(os.Stdout, "\033[%dB", len(roots))
+
+	for _, err := range errs {
+		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+	}
 }
 
 func initializeScreen(roots []string) {
@@ -65,13 +78,13 @@ func initializeScreen(roots []string) {
 	_, _ = fmt.Fprintf(os.Stdout, "\033[%dA", len(roots))
 }
 
-func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64) {
+func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64, errors chan<- error) {
 	defer n.Done()
-	for _, entry := range dirents(dir) {
+	for _, entry := range dirents(dir, errors) {
 		if entry.IsDir() {
 			n.Add(1)
 			subdir := filepath.Join(dir, entry.Name())
-			go walkDir(subdir, n, fileSizes)
+			go walkDir(subdir, n, fileSizes, errors)
 		} else {
 			fileSizes <- entry.Size()
 		}
@@ -80,13 +93,13 @@ func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64) {
 
 var sema = make(chan struct{}, 20)
 
-func dirents(dir string) []os.FileInfo {
+func dirents(dir string, errors chan<- error) []os.FileInfo {
 	sema <- struct{}{}
 	defer func() { <-sema }()
 
 	entries, err := ioutil.ReadDir(dir)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ex09: %v", err)
+		errors <- err
 		return nil
 	}
 	return entries
