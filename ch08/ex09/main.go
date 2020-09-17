@@ -67,7 +67,7 @@ func main() {
 	_, _ = fmt.Fprintf(os.Stdout, "\033[%dB", len(roots))
 
 	for _, err := range errs {
-		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "\u001b[00;31merror: %v\u001b[00m\n", err)
 	}
 }
 
