@@ -24,10 +24,7 @@ func main() {
 	}
 }
 
-type client struct {
-	Name string
-	Ch chan<- string
-}
+type client chan<- string
 
 var (
 	entering = make(chan client)
@@ -41,21 +38,13 @@ func broadcaster() {
 		select {
 		case msg := <-messages:
 			for cli := range clients {
-				cli.Ch <- msg
+				cli <- msg
 			}
 		case cli := <-entering:
-			if len(clients) > 0 {
-				cli.Ch <- "現在チャットには以下のメンバーが参加しています。"
-				for member := range clients {
-					cli.Ch <- "Name: " + member.Name
-				}
-			} else {
-				cli.Ch <- "あなたがこのチャットの最初のメンバーです。"
-			}
 			clients[cli] = true
 		case cli := <-leaving:
 			delete(clients, cli)
-			close(cli.Ch)
+			close(cli)
 		}
 	}
 }
@@ -67,14 +56,14 @@ func handleConn(conn net.Conn) {
 	who := conn.RemoteAddr().String()
 	ch <- "You are " + who
 	messages <- who + " has arrived."
-	entering <- client{who, ch}
+	entering <- ch
 
 	input := bufio.NewScanner(conn)
 	for input.Scan() {
 		messages <- who + ": " + input.Text()
 	}
 
-	leaving <- client{who, ch}
+	leaving <- ch
 	messages <- who + " has left"
 	conn.Close()
 }
