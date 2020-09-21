@@ -10,6 +10,7 @@ import (
 func main() {
 	response := mirroredQuery()
 	fmt.Println(response)
+	os.Exit(0)
 }
 
 func mirroredQuery() string {
@@ -17,9 +18,17 @@ func mirroredQuery() string {
 	responses := make(chan string)
 	cancel := make(chan struct{})
 	go func() {
+		r, err := request("gopl.io", cancel)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+			return
+		}
+		responses <- r
+	}()
+	go func() {
 		r, err := request("asia.gopl.io", cancel)
 		if err != nil {
-			_, _ = fmt.Fprint(os.Stderr, err)
+			_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 			return
 		}
 		responses <- r
@@ -27,7 +36,7 @@ func mirroredQuery() string {
 	go func() {
 		r, err := request("europe.gopl.io", cancel)
 		if err != nil {
-			_, _ = fmt.Fprint(os.Stderr, err)
+			_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 			return
 		}
 		responses <- r
@@ -35,22 +44,18 @@ func mirroredQuery() string {
 	go func() {
 		r, err := request("americas.gopl.io", cancel)
 		if err != nil {
-			_, _ = fmt.Fprint(os.Stderr, err)
-			return
-		}
-		responses <- r
-	}()
-	go func() {
-		r, err := request("gopl.io", cancel)
-		if err != nil {
-			_, _ = fmt.Fprint(os.Stderr, err)
+			_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 			return
 		}
 		responses <- r
 	}()
 	select {
 	case r := <-responses:
-		cancel <- struct{}{}
+		go func() {
+			// ここ、なんで詰まるんだっけ？
+			cancel <- struct{}{}
+			fmt.Println("cancelled.")
+		}()
 		return r
 	}
 }
@@ -62,18 +67,15 @@ func request(hostname string, cancel chan struct{}) (response string, err error)
 	client := new(http.Client)
 	resp, err := client.Do(req)
 	if err != nil {
-		_, _ = fmt.Fprint(os.Stderr, "request is cancelled.")
 		return
 	}
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("getting %s: %s", hostname, resp.Status)
 		return
 	}
 	// 無視
 	b, err := ioutil.ReadAll(resp.Body)
-	fmt.Printf("body is %s", b)
 	response = fmt.Sprintf("%s", b)
 	return
 }
