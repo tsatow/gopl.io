@@ -10,11 +10,12 @@ func main() {
 	pong := make(chan struct{})
 	var count int
 
-	after := time.After(1*time.Second)
 	go func() {
 		// starter
 		ping <- struct{}{}
 	}()
+
+	after := time.After(1*time.Second)
 	go func(){
 		for {
 			<- ping
