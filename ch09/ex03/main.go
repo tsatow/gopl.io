@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	// ぐちゃぐちゃになってしまった...
 	cancel := make(chan struct{})
 	memo := New(httpGetBody, cancel)
 	var wg sync.WaitGroup
