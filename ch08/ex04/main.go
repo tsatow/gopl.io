@@ -17,23 +17,24 @@ func main() {
 	}
 
 	for {
-		var wg sync.WaitGroup
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Print(err)
 			continue
 		}
 
-		wg.Add(1)
 		go func (c net.Conn) {
-			defer wg.Done()
+			var wg sync.WaitGroup
 			input := bufio.NewScanner(c)
 			for input.Scan() {
-				echo(c, input.Text(), 1*time.Second)
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					echo(c, input.Text(), 1*time.Second)
+				}()
 			}
+			wg.Wait()
 		}(conn)
-
-		wg.Wait()
 
 		if tcpConn, ok := conn.(*net.TCPConn); ok {
 			tcpConn.CloseWrite()
