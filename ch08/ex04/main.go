@@ -34,11 +34,11 @@ func main() {
 				}()
 			}
 			wg.Wait()
-		}(conn)
 
-		if tcpConn, ok := conn.(*net.TCPConn); ok {
-			tcpConn.CloseWrite()
-		}
+			if tcpConn, ok := conn.(*net.TCPConn); ok {
+				tcpConn.CloseWrite()
+			}
+		}(conn)
 	}
 }
 
