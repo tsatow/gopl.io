@@ -15,7 +15,6 @@ func Marshal(v interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// 戻り値にcursor位置返すようにしたらmapに構造体入れられても大丈夫かな？？
 func encode(buf *bytes.Buffer, v reflect.Value, offset string) error {
 	switch v.Kind() {
 	case reflect.Invalid:
@@ -83,8 +82,7 @@ func encode(buf *bytes.Buffer, v reflect.Value, offset string) error {
 				return err
 			}
 			buf.WriteByte(' ')
-			// keyがどこまでoffsetを要求するかわからないから駄目じゃん
-			// 構造体入れられたら死ぬ...
+			// TODO 構造体とか複数行にまたがる場合は縦配置にしたい
 			if err := encode(buf, v.MapIndex(key), keyOffset+" "); err != nil {
 				return err
 			}
