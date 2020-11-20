@@ -9,7 +9,7 @@ import (
 )
 
 type lexer struct {
-	scan scanner.Scanner
+	scan  scanner.Scanner
 	token rune
 }
 
@@ -38,34 +38,49 @@ func read(lex *lexer, v reflect.Value) {
 		}
 	case scanner.String:
 		s, _ := strconv.Unquote(lex.text())
-		v.SetString(s)
+		switch v.Kind() {
+		case reflect.Interface, reflect.Ptr:
+			read(lex, v.Elem())
+		default:
+			v.SetString(s)
+		}
 		lex.next()
 		return
 	case scanner.Int:
 		i, _ := strconv.Atoi(lex.text())
-		v.SetInt(int64(i))
+		switch v.Kind() {
+		case reflect.Uint:
+			v.SetUint(uint64(i))
+		case reflect.Interface, reflect.Ptr:
+			read(lex, v.Elem())
+		default:
+			v.SetInt(int64(i))
+		}
 		lex.next()
 		return
 	case scanner.Float:
+		f, _ := strconv.ParseFloat(lex.text(), 64)
 		switch v.Kind() {
-		case reflect.Float32:
-			f32, _ := strconv.ParseFloat(lex.text(), 32)
-			v.SetFloat(f32)
-		case reflect.Float64:
-			f64, _ := strconv.ParseFloat(lex.text(), 64)
-			v.SetFloat(f64)
+		case reflect.Float32, reflect.Float64:
+			v.SetFloat(f)
+		case reflect.Interface, reflect.Ptr:
+			read(lex, v.Elem())
 		default:
 			// 文字列、整数に変換してあげてもいいかもしれないけどやらない
 			panic("v is not float")
 		}
 		return
 	case '#':
-		// 男らしくエラー処理はしない。不正確なインプットしたやつが悪い。
 		lex.next() // 'C'を消費
 		lex.next() // '('を消費
 		c := reflect.ValueOf([2]float64{0})
 		readList(lex, c)
-		v.SetComplex(complex(c.Index(0).Float(), c.Index(1).Float()))
+		switch v.Kind() {
+		case reflect.Interface, reflect.Ptr:
+			read(lex, v.Elem())
+		default:
+			v.SetComplex(complex(c.Index(0).Float(), c.Index(1).Float()))
+		}
 		lex.next() // ')'を消費する
 	case '(':
 		lex.next()
