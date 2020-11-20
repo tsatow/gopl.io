@@ -36,7 +36,7 @@ func display(path string, v reflect.Value, recCount int) {
 			case reflect.Array:
 				buf := bytes.NewBufferString(fmt.Sprintf("%s[%d]{ ", key.Type(), key.Len()))
 				for i := 0; i < key.Len(); i++ {
-					// 構造体や配列のネストは考慮しない
+					// 構造体や配列のネストは考えたいけど時間がない
 					buf.WriteString(fmt.Sprintf("%s, ", formatAtom(key.Index(i))))
 				}
 				buf.WriteString("}")
@@ -44,7 +44,7 @@ func display(path string, v reflect.Value, recCount int) {
 			case reflect.Struct:
 				buf := bytes.NewBufferString(fmt.Sprintf("%s{ ", key.Type()))
 				for i := 0; i < key.NumField(); i++ {
-					// 構造体や配列のネストは考慮しない
+					// 構造体や配列のネストは考えたいけど時間がない
 					buf.WriteString(fmt.Sprintf("%s: %s, ", key.Type().Field(i).Name, formatAtom(key.Field(i))))
 				}
 				buf.WriteString("}")
