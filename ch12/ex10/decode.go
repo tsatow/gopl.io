@@ -46,6 +46,27 @@ func read(lex *lexer, v reflect.Value) {
 		v.SetInt(int64(i))
 		lex.next()
 		return
+	case scanner.Float:
+		switch v.Kind() {
+		case reflect.Float32:
+			f32, _ := strconv.ParseFloat(lex.text(), 32)
+			v.SetFloat(f32)
+		case reflect.Float64:
+			f64, _ := strconv.ParseFloat(lex.text(), 64)
+			v.SetFloat(f64)
+		default:
+			// 文字列、整数に変換してあげてもいいかもしれないけどやらない
+			panic("v is not float")
+		}
+		return
+	case '#':
+		// 男らしくエラー処理はしない。不正確なインプットしたやつが悪い。
+		lex.next() // 'C'を消費
+		lex.next() // '('を消費
+		c := reflect.ValueOf([2]float64{0})
+		readList(lex, c)
+		v.SetComplex(complex(c.Index(0).Float(), c.Index(1).Float()))
+		lex.next() // ')'を消費する
 	case '(':
 		lex.next()
 		readList(lex, v)
