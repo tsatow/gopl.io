@@ -80,7 +80,7 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 		}
 		buf.WriteByte(')')
 	case reflect.Interface:
-		buf.WriteString(fmt.Sprintf(`("%s" `, v.Type()))
+		buf.WriteString(fmt.Sprintf(`("%s" `, v.Elem().Type()))
 		encode(buf, v.Elem())
 		buf.WriteByte(')')
 	default:

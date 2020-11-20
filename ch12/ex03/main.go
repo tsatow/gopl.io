@@ -12,6 +12,7 @@ type Movie struct {
 	Actor           map[string]string
 	Oscars          []string
 	Sequel          *string
+	Interface       interface{}
 }
 
 func main() {
@@ -34,6 +35,7 @@ func main() {
 			"Best Director (Nomin.)",
 			"Best Picture (Nomin.)",
 		},
+		Interface: []int {1, 2, 3},
 	}
 	b, err := Marshal(strangelove)
 	if err != nil {
