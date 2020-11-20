@@ -16,6 +16,10 @@ func (encoder *Encoder) Encode(v interface{}) error {
 	return encode(encoder.w, reflect.ValueOf(v))
 }
 
+func NewEncoder(w io.Writer) Encoder {
+	return Encoder{w: w}
+}
+
 func encode(w io.Writer, v reflect.Value) error {
 	switch v.Kind() {
 	case reflect.Invalid:
