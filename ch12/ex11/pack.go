@@ -31,8 +31,8 @@ func Pack(u *url.URL, data interface{}) error {
 		default:
 			return fmt.Errorf("unsupported kind %s", v.Type())
 		}
-		query := strings.Join(params, "&")
-		u.RawQuery = query
 	}
+	query := strings.Join(params, "&")
+	u.RawQuery = query
 	return nil
 }
