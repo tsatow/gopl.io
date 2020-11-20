@@ -80,15 +80,8 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 		}
 		buf.WriteByte(')')
 	case reflect.Interface:
-		buf.WriteString(fmt.Sprintf(`("%s" (`, v.Type()))
-		for i := 0; i < v.NumField(); i++ {
-			if i > 0 {
-				buf.WriteByte(' ')
-			}
-			if err := encode(buf, v.Field(i)); err != nil {
-				return err
-			}
-		}
+		buf.WriteString(fmt.Sprintf(`("%s" `, v.Type()))
+		encode(buf, v.Elem())
 		buf.WriteByte(')')
 	default:
 		return fmt.Errorf("unsupported type: %s", v.Type())
