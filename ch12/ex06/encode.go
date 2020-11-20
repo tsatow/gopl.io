@@ -65,7 +65,6 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 				if i > 0 {
 					structBuf.WriteByte(' ')
 				}
-				v.Field(i).IsNil()
 				fmt.Fprintf(structBuf, "(%s ", v.Type().Field(i).Name)
 				if err := encode(structBuf, v.Field(i)); err != nil {
 					return err

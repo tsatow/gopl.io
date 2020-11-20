@@ -36,8 +36,7 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 	case reflect.String:
 		fmt.Fprintf(buf, "%q", v.String())
 	case reflect.Ptr:
-		// 無視する。
-		buf.WriteString("null")
+		encode(buf, v.Elem())
 	case reflect.Array, reflect.Slice:
 		buf.WriteString("[")
 		for i := 0; i < v.Len(); i++ {
@@ -78,8 +77,7 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 		}
 		buf.WriteString("}")
 	case reflect.Interface:
-		// サポートされていないので無視する。
-		buf.WriteString("null")
+		encode(buf, v.Elem())
 	default:
 		return fmt.Errorf("unsupported type: %s", v.Type())
 	}
